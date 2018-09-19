@@ -144,7 +144,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         from game import Actions
         maxValue = self.value(gameState, 0, 0)
-        print(maxValue[0])
         return maxValue[2]
 
     def maxValue(self, gameState, agentIndex, lookupDepth):
