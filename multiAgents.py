@@ -113,6 +113,7 @@ class MultiAgentSearchAgent(Agent):
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
 
+
 class MinimaxAgent(MultiAgentSearchAgent):
     """
     Your minimax agent (question 2)
@@ -141,8 +142,40 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        from game import Actions
+        maxValue = self.value(gameState, 0, 0)
+        print(maxValue[0])
+        return maxValue[2]
+
+    def maxValue(self, gameState, agentIndex, lookupDepth):
+        v = -99999, gameState
+        actions = gameState.getLegalActions(agentIndex)
+        successors = [gameState.generateSuccessor(agentIndex % gameState.getNumAgents(), action) for action in actions]
+        for i,successor in enumerate(successors):
+            if self.value(successor, (agentIndex + 1) % gameState.getNumAgents(), lookupDepth)[0] > v[0]:
+                v = self.value(successor, (agentIndex + 1) % gameState.getNumAgents(), lookupDepth)
+                vR = (v[0], gameState, actions[i])
+        return vR
+
+    def minValue(self, gameState, agentIndex, lookupDepth):
+        v = 99999, gameState
+        actions = gameState.getLegalActions(agentIndex)
+        successors = [gameState.generateSuccessor(agentIndex % gameState.getNumAgents(), action) for action in actions]
+        for i,successor in enumerate(successors):
+            if self.value(successor, (agentIndex + 1) % gameState.getNumAgents(), lookupDepth)[0] < v[0]:
+                v = self.value(successor, (agentIndex + 1) % gameState.getNumAgents(), lookupDepth)
+                vR = (v[0], gameState, actions[i])
+        return vR
+
+    def value(self, gameState, agentIndex, lookupDepth):
+        if gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState), gameState
+        if agentIndex % gameState.getNumAgents() == 0:
+            lookupDepth = lookupDepth + 1
+            if lookupDepth > self.depth:
+                return self.evaluationFunction(gameState), gameState
+            return self.maxValue(gameState, agentIndex, lookupDepth)
+        return self.minValue(gameState, agentIndex, lookupDepth)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
