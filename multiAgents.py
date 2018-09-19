@@ -142,7 +142,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-        from game import Actions
         maxValue = self.value(gameState, 0, 0)
         return maxValue[2]
 
