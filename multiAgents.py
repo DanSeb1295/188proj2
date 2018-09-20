@@ -150,8 +150,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
         actions = gameState.getLegalActions(agentIndex)
         successors = [gameState.generateSuccessor(agentIndex % gameState.getNumAgents(), action) for action in actions]
         for i,successor in enumerate(successors):
-            if self.value(successor, (agentIndex + 1) % gameState.getNumAgents(), lookupDepth)[0] > v[0]:
-                v = self.value(successor, (agentIndex + 1) % gameState.getNumAgents(), lookupDepth)
+            values = self.value(successor, (agentIndex + 1) % gameState.getNumAgents(), lookupDepth)
+            if values[0] > v[0]:
+                v = values
                 vR = (v[0], gameState, actions[i])
         return vR
 
@@ -160,8 +161,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
         actions = gameState.getLegalActions(agentIndex)
         successors = [gameState.generateSuccessor(agentIndex % gameState.getNumAgents(), action) for action in actions]
         for i,successor in enumerate(successors):
-            if self.value(successor, (agentIndex + 1) % gameState.getNumAgents(), lookupDepth)[0] < v[0]:
-                v = self.value(successor, (agentIndex + 1) % gameState.getNumAgents(), lookupDepth)
+            values = self.value(successor, (agentIndex + 1) % gameState.getNumAgents(), lookupDepth)
+            if values[0] < v[0]:
+                v = values
                 vR = (v[0], gameState, actions[i])
         return vR
 
@@ -184,8 +186,49 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        def maxValue(gameState, agentIndex, lookupDepth, a, b):
+            v = -99999, gameState
+            actions = gameState.getLegalActions(agentIndex)
+            successors = [gameState.generateSuccessor(agentIndex % gameState.getNumAgents(), action) for action in actions]
+            for i,successor in enumerate(successors):
+                values = value(successor, (agentIndex + 1) % gameState.getNumAgents(), lookupDepth, a, b)
+                if values[0] > v[0]:
+                    v = values
+                    vR = (v[0], gameState, actions[i])
+                    if v[0] > b:
+                        return vR
+                    a = max(a, v[0])
+            return vR
+
+        def minValue(gameState, agentIndex, lookupDepth, a, b):
+            v = 99999, gameState
+            actions = gameState.getLegalActions(agentIndex)
+            successors = [gameState.generateSuccessor(agentIndex % gameState.getNumAgents(), action) for action in actions]
+            for i,successor in enumerate(successors):
+                values = value(successor, (agentIndex + 1) % gameState.getNumAgents(), lookupDepth, a, b)
+                if values[0] < v[0]:
+                    v = values
+                    vR = (v[0], gameState, actions[i])
+                    if v[0] < a:
+                        return vR
+                    b = min(b, v[0])
+            return vR
+
+        def value(gameState, agentIndex, lookupDepth, a, b):
+            if gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState), gameState
+            if agentIndex % gameState.getNumAgents() == 0:
+                lookupDepth = lookupDepth + 1
+                if lookupDepth > self.depth:
+                    return self.evaluationFunction(gameState), gameState
+                return maxValue(gameState, agentIndex, lookupDepth, a, b)
+            return minValue(gameState, agentIndex, lookupDepth, a, b)
+
+        a = -99999
+        b = 99999
+        maxValue2 = value(gameState, 0, 0, a, b)
+        return maxValue2[2]
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
