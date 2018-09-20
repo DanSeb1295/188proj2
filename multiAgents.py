@@ -143,8 +143,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         numAgents = gameState.getNumAgents()
-        print('numAgents',numAgents)
-        print('===============GetAction========================')
         def value(state, agentIndex,depth):
             # print('===============Value called by ========================')
             #print('agentIndex ', agentIndex,' depth ', depth)
@@ -168,7 +166,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 v = max(v, successor_value)
                 if v == successor_value:
                     chosen_move = move
-            #print('for','maxAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
             return (v,chosen_move)
 
         def minValue(gameState,agentIndex,depth):
@@ -176,7 +173,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
             v = 99999
             chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions(agentIndex)
-            #print('legalMoves for',agentIndex,'are ', legalMoves)
             newAgentIndex = (agentIndex + 1) % numAgents
             for move in legalMoves:
                 successor_value, candidate_move = value(gameState.generateSuccessor(agentIndex,move),newAgentIndex,
@@ -184,7 +180,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 v = min(v, successor_value)
                 if v == successor_value:
                     chosen_move = move
-            #print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
             return (v,chosen_move)
 
         v,chosenMove = value(gameState,0,0)
@@ -201,13 +196,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         numAgents = gameState.getNumAgents()
-        #print('numAgents',numAgents)
-        #print('===============GetAction========================')
         def value(state, agentIndex,depth,alpha, beta):
-            # print('===============Value called by ========================')
-            #print('agentIndex ', agentIndex,' depth ', depth)
             if self.depth*numAgents == depth:
-                #print('returning terminal state', self.evaluationFunction(state))
                 return (self.evaluationFunction(state), Directions.STOP)
             if state.isWin() or state.isLose():
                 return (self.evaluationFunction(state), Directions.STOP)
@@ -259,8 +249,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         v,chosenMove = value(gameState,0,0, -999, 999)
         return chosenMove
-# python autograder.py -t C:\Users\Ernest\PycharmProjects\188proj2\test_cases\q3\0-small-tree.test --no-graphic
-
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
@@ -277,80 +265,56 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         numAgents = gameState.getNumAgents()
-        print('numAgents',numAgents)
-        print('===============GetAction========================')
         def value(state, agentIndex,depth):
-            #print('===============Value called by ========================')
+            # print('===============Value called by ========================')
             #print('agentIndex ', agentIndex,' depth ', depth)
             if self.depth*numAgents == depth:
                 #print('returning terminal state', self.evaluationFunction(state))
-                return (self.evaluationFunction(state),state,None)
+                return (self.evaluationFunction(state), Directions.STOP)
             if state.isWin() or state.isLose():
-                return (self.evaluationFunction(state), state,None)
+                return (self.evaluationFunction(state), Directions.STOP)
             if agentIndex == 0: return maxValue(state,agentIndex,depth)
             if agentIndex != 0: return expValue(state,agentIndex,depth)
 
         def maxValue(gameState,agentIndex,depth):
             print('==============in max agent', agentIndex, 'depth',depth, '=========================')
-            v = -999
-            chosen_successor = None
-            chosen_move = None
+            v = -99999
+            chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions()
-            print('legalMoves are ',legalMoves)
-            maxAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
             newAgentIndex = (agentIndex + 1)%numAgents
-            for successor_index in range(len(maxAgentStates)):
-                successor_value, candidateSuccessor, candidateMove = value(maxAgentStates[successor_index],newAgentIndex,depth+1)
+            for move in legalMoves:
+                successor_value, candidate_move = value(gameState.generateSuccessor(agentIndex,move),newAgentIndex,
+                                                        depth+1)
                 v = max(v, successor_value)
                 if v == successor_value:
-                    chosen_successor = maxAgentStates[successor_index]
-                    # need chosen_move because the testcase doesn't allow me to call getPacmanPosition so i have to keep track of the last move
-                    chosen_move = legalMoves[successor_index]
-            print('for','maxAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
-            return (v,chosen_successor,chosen_move)
+                    chosen_move = move
+            return (v,chosen_move)
+
         def expValue(gameState,agentIndex,depth):
             print('===============in exp agent', agentIndex, 'depth', depth, '========================')
             v = 0
-            chosen_successor = None
-            chosen_move = None
-            print('gamestate is', gameState)
-            #print('pacman position is ', gameState.getPacmanPosition())
-            #print('agent position is',gameState.getGhostState(agentIndex))
+            chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions(agentIndex)
-            print('legalMoves for',agentIndex,'are ', legalMoves)
-            expAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
             newAgentIndex = (agentIndex + 1) % numAgents
-            for successor_index in range(len(expAgentStates)):
-                prob = 1.0/len(expAgentStates)
-                successor_value, candidateSuccessor, candidateMove = value(expAgentStates[successor_index], newAgentIndex,depth+1)
+            for move in legalMoves:
+                prob = 1.0/len(legalMoves)
+                successor_value, candidateMove = value(gameState.generateSuccessor(agentIndex,move), newAgentIndex,
+                                                       depth+1)
                 # get probability
                 successor_value *= prob
                 v += successor_value
-            random_number = random.randint(0,len(expAgentStates)-1)
-            print('random number is', random_number)
-            print('number of exp agents is', len(expAgentStates))
-            chosen_successor = expAgentStates[random_number]
+            random_number = random.randint(0,len(legalMoves)-1)
+            # print('random number is', random_number)
+            # print('number of exp agents is', len(expAgentStates))
             chosen_move = legalMoves[random_number]
-            print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
-            return (v,chosen_successor,chosen_move)
+            #print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
+            return (v,chosen_move)
 
 
         # Generate successor states from legalmoves
         # for each successor state
-        v, chosenSuccessor, chosenMove = value(gameState,0,0)
-        print('============== FINAL ========================')
-        print('v is ', v, '\n', chosenSuccessor)
-        # legalMoves = gameState.getLegalActions()
-        # print(legalMoves)
-        # potentialStates = [gameState.generateSuccessor(0, move) for move in legalMoves]
-        # print(potentialStates)
-        # chosenIndex = [index for index in range(len(legalMoves)) if potentialStates[index] == chosenSuccessor]
-        # print('chosenIndex is',chosenIndex)
-        # return legalMoves[chosenIndex[0]]
-        if chosenSuccessor == None:
-            return 'Stop'
-        else:
-            return chosenMove
+        v,chosenMove = value(gameState,0,0)
+        return chosenMove
 
 
 def betterEvaluationFunction(currentGameState):
@@ -361,7 +325,22 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    successorGameState = currentGameState
+    newPos = successorGameState.getPacmanPosition()
+    newFood = successorGameState.getFood()
+    newGhostStates = successorGameState.getGhostStates()
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+    foodlist = sorted(newFood.asList(), key=lambda t: t[1])
+    foodDistances = [manhattanDistance(i, newPos) for i in foodlist]
+    minFood = min(foodDistances, default=0)
+    ghostDistances = [(manhattanDistance(i, newPos), c) for c, i in enumerate(successorGameState.getGhostPositions())]
+    nearestGhost = min(ghostDistances, default=0, key=lambda t: t[0])
+
+    if nearestGhost[0] < 2:
+        return -9999999
+    else:
+        return (nearestGhost[0] * (newScaredTimes[nearestGhost[1]] ) *5
+                - minFood * 5 - successorGameState.getNumFood() * 500)
 
 # Abbreviation
 better = betterEvaluationFunction
