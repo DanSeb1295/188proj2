@@ -169,6 +169,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 v = max(v, successor_value)
                 if v == successor_value:
                     chosen_successor = maxAgentStates[successor_index]
+                    # need chosen_move because the testcase doesn't allow me to call getPacmanPosition so i have to keep track of the last move
                     chosen_move = legalMoves[successor_index]
             print('for','maxAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
             return (v,chosen_successor,chosen_move)
@@ -191,7 +192,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     chosen_successor = minAgentStates[successor_index]
                     chosen_move = legalMoves[successor_index]
             print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
-            # TODO FIX WHY THERE ARE ALWAYS NONE IN LEGAL MOVES
             return (v,chosen_successor,chosen_move)
 
 
@@ -222,7 +222,86 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        numAgents = gameState.getNumAgents()
+        #print('numAgents',numAgents)
+        #print('===============GetAction========================')
+        def value(state, agentIndex,depth,alpha, beta):
+            # print('===============Value called by ========================')
+            #print('agentIndex ', agentIndex,' depth ', depth)
+            if self.depth*numAgents == depth:
+                #print('returning terminal state', self.evaluationFunction(state))
+                return (self.evaluationFunction(state),state,None)
+            if state.isWin() or state.isLose():
+                return (self.evaluationFunction(state), state,None)
+            if agentIndex == 0: return maxValue(state,agentIndex,depth,alpha,beta)
+            if agentIndex != 0: return minValue(state,agentIndex,depth,alpha,beta)
+
+        def maxValue(gameState,agentIndex,depth, alpha, beta):
+            print('==============in max agent', agentIndex, 'depth',depth, '=========================')
+            v = -999
+            chosen_successor = None
+            chosen_move = None
+            legalMoves = gameState.getLegalActions()
+            #print('legalMoves are ',legalMoves)
+            maxAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
+            newAgentIndex = (agentIndex + 1)%numAgents
+            print('successors are', maxAgentStates)
+            for successor_index in range(len(maxAgentStates)):
+                print('exploring', maxAgentStates[successor_index].state)
+                successor_value, candidateSuccessor, candidateMove = value(maxAgentStates[successor_index],newAgentIndex,
+                                                                           depth+1, alpha, beta)
+                v = max(v, successor_value)
+                if v == successor_value:
+                    chosen_successor = maxAgentStates[successor_index]
+                    chosen_move = legalMoves[successor_index]
+                print('current value of beta is', beta)
+                if v >= beta:
+                    print("PRUNING maximizer")
+                    return (v,chosen_successor,chosen_move)
+                alpha = max(alpha,v)
+                print('new value of alpha is', alpha)
+            #print('for','maxAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
+            return (v,chosen_successor,chosen_move)
+
+        def minValue(gameState,agentIndex,depth,alpha,beta):
+            print('===============in min agent', agentIndex, 'depth', depth, '========================')
+            v = 999
+            chosen_successor = None
+            chosen_move = None
+            #print('gamestate is', gameState)
+            #print('pacman position is ', gameState.getPacmanPosition())
+            #print('agent position is',gameState.getGhostState(agentIndex))
+            legalMoves = gameState.getLegalActions(agentIndex)
+            #print('legalMoves for',agentIndex,'are ', legalMoves)
+            minAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
+            newAgentIndex = (agentIndex + 1) % numAgents
+            print('successors are', str([x.state for x in minAgentStates]))
+            for successor_index in range(len(minAgentStates)):
+                print('exploring', minAgentStates[successor_index].state)
+                successor_value, candidateSuccessor, candidateMove = value(minAgentStates[successor_index], newAgentIndex,
+                                                                           depth+1, alpha, beta)
+                v = min(v, successor_value)
+                if v == successor_value:
+                    chosen_successor = minAgentStates[successor_index]
+                    chosen_move = legalMoves[successor_index]
+                print('current value of alpha is', alpha)
+                if v <= alpha:
+                    print("PRUNING minimizer")
+                    return (v,chosen_successor,chosen_move)
+                beta = min(beta, v)
+                print('new value of beta is', beta)
+            #print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
+            return (v,chosen_successor,chosen_move)
+        v, chosenSuccessor, chosenMove = value(gameState,0,0, -999, 999)
+        # print('============== FINAL ========================')
+        # print('v is ', v, '\n', chosenSuccessor)
+        if chosenSuccessor == None:
+            return 'Stop'
+        else:
+            return chosenMove
+# python autograder.py -t C:\Users\Ernest\PycharmProjects\188proj2\test_cases\q3\0-small-tree.test --no-graphic
+
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -237,7 +316,82 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        numAgents = gameState.getNumAgents()
+        print('numAgents',numAgents)
+        print('===============GetAction========================')
+        def value(state, agentIndex,depth):
+            #print('===============Value called by ========================')
+            #print('agentIndex ', agentIndex,' depth ', depth)
+            if self.depth*numAgents == depth:
+                #print('returning terminal state', self.evaluationFunction(state))
+                return (self.evaluationFunction(state),state,None)
+            if state.isWin() or state.isLose():
+                return (self.evaluationFunction(state), state,None)
+            if agentIndex == 0: return maxValue(state,agentIndex,depth)
+            if agentIndex != 0: return expValue(state,agentIndex,depth)
+
+        def maxValue(gameState,agentIndex,depth):
+            print('==============in max agent', agentIndex, 'depth',depth, '=========================')
+            v = -999
+            chosen_successor = None
+            chosen_move = None
+            legalMoves = gameState.getLegalActions()
+            print('legalMoves are ',legalMoves)
+            maxAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
+            newAgentIndex = (agentIndex + 1)%numAgents
+            for successor_index in range(len(maxAgentStates)):
+                successor_value, candidateSuccessor, candidateMove = value(maxAgentStates[successor_index],newAgentIndex,depth+1)
+                v = max(v, successor_value)
+                if v == successor_value:
+                    chosen_successor = maxAgentStates[successor_index]
+                    # need chosen_move because the testcase doesn't allow me to call getPacmanPosition so i have to keep track of the last move
+                    chosen_move = legalMoves[successor_index]
+            print('for','maxAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
+            return (v,chosen_successor,chosen_move)
+        def expValue(gameState,agentIndex,depth):
+            print('===============in exp agent', agentIndex, 'depth', depth, '========================')
+            v = 0
+            chosen_successor = None
+            chosen_move = None
+            print('gamestate is', gameState)
+            #print('pacman position is ', gameState.getPacmanPosition())
+            #print('agent position is',gameState.getGhostState(agentIndex))
+            legalMoves = gameState.getLegalActions(agentIndex)
+            print('legalMoves for',agentIndex,'are ', legalMoves)
+            expAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
+            newAgentIndex = (agentIndex + 1) % numAgents
+            for successor_index in range(len(expAgentStates)):
+                prob = 1.0/len(expAgentStates)
+                successor_value, candidateSuccessor, candidateMove = value(expAgentStates[successor_index], newAgentIndex,depth+1)
+                # get probability
+                successor_value *= prob
+                v += successor_value
+            random_number = random.randint(0,len(expAgentStates)-1)
+            print('random number is', random_number)
+            print('number of exp agents is', len(expAgentStates))
+            chosen_successor = expAgentStates[random_number]
+            chosen_move = legalMoves[random_number]
+            print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
+            return (v,chosen_successor,chosen_move)
+
+
+        # Generate successor states from legalmoves
+        # for each successor state
+        v, chosenSuccessor, chosenMove = value(gameState,0,0)
+        print('============== FINAL ========================')
+        print('v is ', v, '\n', chosenSuccessor)
+        # legalMoves = gameState.getLegalActions()
+        # print(legalMoves)
+        # potentialStates = [gameState.generateSuccessor(0, move) for move in legalMoves]
+        # print(potentialStates)
+        # chosenIndex = [index for index in range(len(legalMoves)) if potentialStates[index] == chosenSuccessor]
+        # print('chosenIndex is',chosenIndex)
+        # return legalMoves[chosenIndex[0]]
+        if chosenSuccessor == None:
+            return 'Stop'
+        else:
+            return chosenMove
+
 
 def betterEvaluationFunction(currentGameState):
     """
