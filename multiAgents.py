@@ -143,48 +143,64 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         numAgents = gameState.getNumAgents()
+        print('numAgents',numAgents)
         print('===============GetAction========================')
         def value(state, agentIndex,depth):
             #print('===============Value called by ========================')
             #print('agentIndex ', agentIndex,' depth ', depth)
-            if depth/numAgents == self.depth:
+            if self.depth*numAgents == depth:
                 #print('returning terminal state', self.evaluationFunction(state))
-                return (self.evaluationFunction(state),state)
+                return (self.evaluationFunction(state),state,None)
+            if gameState.isWin() or gameState.isLose():
+                return (self.evaluationFunction(state), state,None)
             if agentIndex == 0: return maxValue(state,agentIndex,depth)
             if agentIndex != 0: return minValue(state,agentIndex,depth)
         def maxValue(gameState,agentIndex,depth):
             print('==============in max agent', agentIndex, 'depth',depth, '=========================')
             v = -999
             chosen_successor = None
+            chosen_move = None
             legalMoves = gameState.getLegalActions()
             print('legalMoves are ',legalMoves)
             maxAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
             newAgentIndex = (agentIndex + 1)%numAgents
-            for successor in maxAgentStates:
-                successor_value, candidateSuccessor = value(successor,newAgentIndex,depth+1)
+            for successor_index in range(len(maxAgentStates)):
+                successor_value, candidateSuccessor, candidateMove = value(maxAgentStates[successor_index],newAgentIndex,depth+1)
                 v = max(v, successor_value)
-                if v == successor_value: chosen_successor = candidateSuccessor
+                if v == successor_value:
+                    chosen_successor = maxAgentStates[successor_index]
+                    chosen_move = legalMoves[successor_index]
             print('for','maxAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
-            return (v,chosen_successor)
+            return (v,chosen_successor,chosen_move)
         def minValue(gameState,agentIndex,depth):
             print('===============in min agent', agentIndex, 'depth', depth, '========================')
             v = 999
             chosen_successor = None
+            chosen_move = None
+            print('gamestate is', gameState)
+            #print('pacman position is ', gameState.getPacmanPosition())
+            print('agent position is',gameState.getGhostState(agentIndex))
             legalMoves = gameState.getLegalActions(agentIndex)
-            print('legalMoves are ', legalMoves)
+            print('legalMoves for',agentIndex,'are ', legalMoves)
             minAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
             newAgentIndex = (agentIndex + 1) % numAgents
-            for successor in minAgentStates:
-                successor_value, candidateSuccessor = value(successor, newAgentIndex,depth+1)
+            for successor_index in range(len(minAgentStates)):
+                successor_value, candidateSuccessor, candidateMove = value(minAgentStates[successor_index], newAgentIndex,depth+1)
                 v = min(v, successor_value )
-                if v == successor_value: chosen_successor = candidateSuccessor
+                if v == successor_value:
+                    chosen_successor = minAgentStates[successor_index]
+                    chosen_move = legalMoves[successor_index]
             print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
-            return (v,chosen_successor)
+            # TODO FIX WHY THERE ARE ALWAYS NONE IN LEGAL MOVES
+            if agentIndex ==1 and len(minAgentStates) ==0:
+                return (-999,chosen_successor,chosen_move)
+            else:
+                return (v,chosen_successor,chosen_move)
 
 
         # Generate successor states from legalmoves
         # for each successor state
-        v, chosenSuccessor = value(gameState,0,0)
+        v, chosenSuccessor, chosenMove = value(gameState,0,0)
         print('============== FINAL ========================')
         print('v is ', v, '\n', chosenSuccessor)
         # legalMoves = gameState.getLegalActions()
@@ -197,10 +213,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         if chosenSuccessor == None:
             return 'Stop'
         else:
-            directionVector = (chosenSuccessor.getPacmanPosition()[0]-gameState.getPacmanPosition()[0],
-                               chosenSuccessor.getPacmanPosition()[1] - gameState.getPacmanPosition()[1])
-            direction = Actions.vectorToDirection(directionVector)
-        return direction
+            return chosenMove
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
