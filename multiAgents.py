@@ -146,71 +146,49 @@ class MinimaxAgent(MultiAgentSearchAgent):
         print('numAgents',numAgents)
         print('===============GetAction========================')
         def value(state, agentIndex,depth):
-            #print('===============Value called by ========================')
+            # print('===============Value called by ========================')
             #print('agentIndex ', agentIndex,' depth ', depth)
             if self.depth*numAgents == depth:
                 #print('returning terminal state', self.evaluationFunction(state))
-                return (self.evaluationFunction(state),state,None)
+                return (self.evaluationFunction(state), Directions.STOP)
             if state.isWin() or state.isLose():
-                return (self.evaluationFunction(state), state,None)
+                return (self.evaluationFunction(state), Directions.STOP)
             if agentIndex == 0: return maxValue(state,agentIndex,depth)
             if agentIndex != 0: return minValue(state,agentIndex,depth)
+
         def maxValue(gameState,agentIndex,depth):
             print('==============in max agent', agentIndex, 'depth',depth, '=========================')
-            v = -999
-            chosen_successor = None
-            chosen_move = None
+            v = -99999
+            chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions()
-            print('legalMoves are ',legalMoves)
-            maxAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
             newAgentIndex = (agentIndex + 1)%numAgents
-            for successor_index in range(len(maxAgentStates)):
-                successor_value, candidateSuccessor, candidateMove = value(maxAgentStates[successor_index],newAgentIndex,depth+1)
+            for move in legalMoves:
+                successor_value, candidate_move = value(gameState.generateSuccessor(agentIndex,move),newAgentIndex,
+                                                        depth+1)
                 v = max(v, successor_value)
                 if v == successor_value:
-                    chosen_successor = maxAgentStates[successor_index]
-                    # need chosen_move because the testcase doesn't allow me to call getPacmanPosition so i have to keep track of the last move
-                    chosen_move = legalMoves[successor_index]
-            print('for','maxAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
-            return (v,chosen_successor,chosen_move)
+                    chosen_move = move
+            #print('for','maxAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
+            return (v,chosen_move)
+
         def minValue(gameState,agentIndex,depth):
             print('===============in min agent', agentIndex, 'depth', depth, '========================')
-            v = 999
-            chosen_successor = None
-            chosen_move = None
-            print('gamestate is', gameState)
-            #print('pacman position is ', gameState.getPacmanPosition())
-            #print('agent position is',gameState.getGhostState(agentIndex))
+            v = 99999
+            chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions(agentIndex)
-            print('legalMoves for',agentIndex,'are ', legalMoves)
-            minAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
+            #print('legalMoves for',agentIndex,'are ', legalMoves)
             newAgentIndex = (agentIndex + 1) % numAgents
-            for successor_index in range(len(minAgentStates)):
-                successor_value, candidateSuccessor, candidateMove = value(minAgentStates[successor_index], newAgentIndex,depth+1)
-                v = min(v, successor_value )
+            for move in legalMoves:
+                successor_value, candidate_move = value(gameState.generateSuccessor(agentIndex,move),newAgentIndex,
+                                                        depth+1)
+                v = min(v, successor_value)
                 if v == successor_value:
-                    chosen_successor = minAgentStates[successor_index]
-                    chosen_move = legalMoves[successor_index]
-            print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
-            return (v,chosen_successor,chosen_move)
+                    chosen_move = move
+            #print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
+            return (v,chosen_move)
 
-
-        # Generate successor states from legalmoves
-        # for each successor state
-        v, chosenSuccessor, chosenMove = value(gameState,0,0)
-        print('============== FINAL ========================')
-        print('v is ', v, '\n', chosenSuccessor)
-        # legalMoves = gameState.getLegalActions()
-        # print(legalMoves)
-        # potentialStates = [gameState.generateSuccessor(0, move) for move in legalMoves]
-        # print(potentialStates)
-        # chosenIndex = [index for index in range(len(legalMoves)) if potentialStates[index] == chosenSuccessor]
-        # print('chosenIndex is',chosenIndex)
-        # return legalMoves[chosenIndex[0]]
-        if chosenSuccessor == None:
-            return 'Stop'
-        else:
-            return chosenMove
+        v,chosenMove = value(gameState,0,0)
+        return chosenMove
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -230,75 +208,57 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             #print('agentIndex ', agentIndex,' depth ', depth)
             if self.depth*numAgents == depth:
                 #print('returning terminal state', self.evaluationFunction(state))
-                return (self.evaluationFunction(state),state,None)
+                return (self.evaluationFunction(state), Directions.STOP)
             if state.isWin() or state.isLose():
-                return (self.evaluationFunction(state), state,None)
+                return (self.evaluationFunction(state), Directions.STOP)
             if agentIndex == 0: return maxValue(state,agentIndex,depth,alpha,beta)
             if agentIndex != 0: return minValue(state,agentIndex,depth,alpha,beta)
 
         def maxValue(gameState,agentIndex,depth, alpha, beta):
             print('==============in max agent', agentIndex, 'depth',depth, '=========================')
-            v = -999
-            chosen_successor = None
-            chosen_move = None
+            v = -99999
+            chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions()
-            #print('legalMoves are ',legalMoves)
-            maxAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
             newAgentIndex = (agentIndex + 1)%numAgents
-            print('successors are', maxAgentStates)
-            for successor_index in range(len(maxAgentStates)):
-                print('exploring', maxAgentStates[successor_index].state)
-                successor_value, candidateSuccessor, candidateMove = value(maxAgentStates[successor_index],newAgentIndex,
-                                                                           depth+1, alpha, beta)
+            for move in legalMoves:
+                successor_value, candidate_move = value(gameState.generateSuccessor(agentIndex,move),newAgentIndex,
+                                                            depth+1, alpha, beta)
                 v = max(v, successor_value)
                 if v == successor_value:
-                    chosen_successor = maxAgentStates[successor_index]
-                    chosen_move = legalMoves[successor_index]
+                    chosen_move = move
                 print('current value of beta is', beta)
-                if v >= beta:
+                if v > beta:
                     print("PRUNING maximizer")
-                    return (v,chosen_successor,chosen_move)
+                    return (v,chosen_move)
                 alpha = max(alpha,v)
                 print('new value of alpha is', alpha)
             #print('for','maxAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
-            return (v,chosen_successor,chosen_move)
+            return (v,chosen_move)
 
         def minValue(gameState,agentIndex,depth,alpha,beta):
             print('===============in min agent', agentIndex, 'depth', depth, '========================')
-            v = 999
-            chosen_successor = None
-            chosen_move = None
-            #print('gamestate is', gameState)
-            #print('pacman position is ', gameState.getPacmanPosition())
-            #print('agent position is',gameState.getGhostState(agentIndex))
+            v = 99999
+            chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions(agentIndex)
             #print('legalMoves for',agentIndex,'are ', legalMoves)
-            minAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
             newAgentIndex = (agentIndex + 1) % numAgents
-            print('successors are', str([x.state for x in minAgentStates]))
-            for successor_index in range(len(minAgentStates)):
-                print('exploring', minAgentStates[successor_index].state)
-                successor_value, candidateSuccessor, candidateMove = value(minAgentStates[successor_index], newAgentIndex,
-                                                                           depth+1, alpha, beta)
+            for move in legalMoves:
+                successor_value, candidate_move = value(gameState.generateSuccessor(agentIndex,move),newAgentIndex,
+                                                            depth+1, alpha, beta)
                 v = min(v, successor_value)
                 if v == successor_value:
-                    chosen_successor = minAgentStates[successor_index]
-                    chosen_move = legalMoves[successor_index]
+                    chosen_move = move
                 print('current value of alpha is', alpha)
-                if v <= alpha:
+                if v < alpha:
                     print("PRUNING minimizer")
-                    return (v,chosen_successor,chosen_move)
+                    return (v,chosen_move)
                 beta = min(beta, v)
                 print('new value of beta is', beta)
             #print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
-            return (v,chosen_successor,chosen_move)
-        v, chosenSuccessor, chosenMove = value(gameState,0,0, -999, 999)
-        # print('============== FINAL ========================')
-        # print('v is ', v, '\n', chosenSuccessor)
-        if chosenSuccessor == None:
-            return 'Stop'
-        else:
-            return chosenMove
+            return (v,chosen_move)
+
+        v,chosenMove = value(gameState,0,0, -999, 999)
+        return chosenMove
 # python autograder.py -t C:\Users\Ernest\PycharmProjects\188proj2\test_cases\q3\0-small-tree.test --no-graphic
 
 
