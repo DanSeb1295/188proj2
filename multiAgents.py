@@ -151,7 +151,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             if self.depth*numAgents == depth:
                 #print('returning terminal state', self.evaluationFunction(state))
                 return (self.evaluationFunction(state),state,None)
-            if gameState.isWin() or gameState.isLose():
+            if state.isWin() or state.isLose():
                 return (self.evaluationFunction(state), state,None)
             if agentIndex == 0: return maxValue(state,agentIndex,depth)
             if agentIndex != 0: return minValue(state,agentIndex,depth)
@@ -179,7 +179,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             chosen_move = None
             print('gamestate is', gameState)
             #print('pacman position is ', gameState.getPacmanPosition())
-            print('agent position is',gameState.getGhostState(agentIndex))
+            #print('agent position is',gameState.getGhostState(agentIndex))
             legalMoves = gameState.getLegalActions(agentIndex)
             print('legalMoves for',agentIndex,'are ', legalMoves)
             minAgentStates = [gameState.generateSuccessor(agentIndex, move) for move in legalMoves]
@@ -192,10 +192,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     chosen_move = legalMoves[successor_index]
             print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
             # TODO FIX WHY THERE ARE ALWAYS NONE IN LEGAL MOVES
-            if agentIndex ==1 and len(minAgentStates) ==0:
-                return (-999,chosen_successor,chosen_move)
-            else:
-                return (v,chosen_successor,chosen_move)
+            return (v,chosen_successor,chosen_move)
 
 
         # Generate successor states from legalmoves
