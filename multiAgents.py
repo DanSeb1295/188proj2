@@ -144,10 +144,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         numAgents = gameState.getNumAgents()
         def value(state, agentIndex,depth):
-            # print('===============Value called by ========================')
-            #print('agentIndex ', agentIndex,' depth ', depth)
+            # # # print('===============Value called by ========================')
+            ## # print('agentIndex ', agentIndex,' depth ', depth)
             if self.depth*numAgents == depth:
-                #print('returning terminal state', self.evaluationFunction(state))
+                ## print('returning terminal state', self.evaluationFunction(state))
                 return (self.evaluationFunction(state), Directions.STOP)
             if state.isWin() or state.isLose():
                 return (self.evaluationFunction(state), Directions.STOP)
@@ -155,7 +155,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             if agentIndex != 0: return minValue(state,agentIndex,depth)
 
         def maxValue(gameState,agentIndex,depth):
-            print('==============in max agent', agentIndex, 'depth',depth, '=========================')
+            # print('==============in max agent', agentIndex, 'depth',depth, '=========================')
             v = -99999
             chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions()
@@ -169,7 +169,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return (v,chosen_move)
 
         def minValue(gameState,agentIndex,depth):
-            print('===============in min agent', agentIndex, 'depth', depth, '========================')
+            # print('===============in min agent', agentIndex, 'depth', depth, '========================')
             v = 99999
             chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions(agentIndex)
@@ -205,7 +205,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             if agentIndex != 0: return minValue(state,agentIndex,depth,alpha,beta)
 
         def maxValue(gameState,agentIndex,depth, alpha, beta):
-            print('==============in max agent', agentIndex, 'depth',depth, '=========================')
+            # print('==============in max agent', agentIndex, 'depth',depth, '=========================')
             v = -99999
             chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions()
@@ -216,21 +216,21 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 v = max(v, successor_value)
                 if v == successor_value:
                     chosen_move = move
-                print('current value of beta is', beta)
+                # print('current value of beta is', beta)
                 if v > beta:
-                    print("PRUNING maximizer")
+                    # print("PRUNING maximizer")
                     return (v,chosen_move)
                 alpha = max(alpha,v)
-                print('new value of alpha is', alpha)
-            #print('for','maxAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
+                # print('new value of alpha is', alpha)
+            ## print('for','maxAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
             return (v,chosen_move)
 
         def minValue(gameState,agentIndex,depth,alpha,beta):
-            print('===============in min agent', agentIndex, 'depth', depth, '========================')
+            # print('===============in min agent', agentIndex, 'depth', depth, '========================')
             v = 99999
             chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions(agentIndex)
-            #print('legalMoves for',agentIndex,'are ', legalMoves)
+            ## print('legalMoves for',agentIndex,'are ', legalMoves)
             newAgentIndex = (agentIndex + 1) % numAgents
             for move in legalMoves:
                 successor_value, candidate_move = value(gameState.generateSuccessor(agentIndex,move),newAgentIndex,
@@ -238,13 +238,13 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 v = min(v, successor_value)
                 if v == successor_value:
                     chosen_move = move
-                print('current value of alpha is', alpha)
+                # print('current value of alpha is', alpha)
                 if v < alpha:
-                    print("PRUNING minimizer")
+                    # print("PRUNING minimizer")
                     return (v,chosen_move)
                 beta = min(beta, v)
-                print('new value of beta is', beta)
-            #print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
+                # print('new value of beta is', beta)
+            ## print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
             return (v,chosen_move)
 
         v,chosenMove = value(gameState,0,0, -999, 999)
@@ -266,10 +266,10 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         numAgents = gameState.getNumAgents()
         def value(state, agentIndex,depth):
-            # print('===============Value called by ========================')
-            #print('agentIndex ', agentIndex,' depth ', depth)
+            # # print('===============Value called by ========================')
+            ## print('agentIndex ', agentIndex,' depth ', depth)
             if self.depth*numAgents == depth:
-                #print('returning terminal state', self.evaluationFunction(state))
+                ## print('returning terminal state', self.evaluationFunction(state))
                 return (self.evaluationFunction(state), Directions.STOP)
             if state.isWin() or state.isLose():
                 return (self.evaluationFunction(state), Directions.STOP)
@@ -277,7 +277,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             if agentIndex != 0: return expValue(state,agentIndex,depth)
 
         def maxValue(gameState,agentIndex,depth):
-            print('==============in max agent', agentIndex, 'depth',depth, '=========================')
+            # print('==============in max agent', agentIndex, 'depth',depth, '=========================')
             v = -99999
             chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions()
@@ -291,7 +291,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             return (v,chosen_move)
 
         def expValue(gameState,agentIndex,depth):
-            print('===============in exp agent', agentIndex, 'depth', depth, '========================')
+            # print('===============in exp agent', agentIndex, 'depth', depth, '========================')
             v = 0
             chosen_move = Directions.STOP
             legalMoves = gameState.getLegalActions(agentIndex)
@@ -304,10 +304,10 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 successor_value *= prob
                 v += successor_value
             random_number = random.randint(0,len(legalMoves)-1)
-            # print('random number is', random_number)
-            # print('number of exp agents is', len(expAgentStates))
+            # # print('random number is', random_number)
+            # # print('number of exp agents is', len(expAgentStates))
             chosen_move = legalMoves[random_number]
-            #print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
+            ## print('for','minAgent',agentIndex,'depth',depth,'value is',v, '\n', chosen_successor)
             return (v,chosen_move)
 
 
@@ -337,10 +337,24 @@ def betterEvaluationFunction(currentGameState):
     nearestGhost = min(ghostDistances, default=0, key=lambda t: t[0])
 
     if nearestGhost[0] < 2:
-        return -9999999
+        return -999999
+    if newScaredTimes[0] > 5:
+        return (nearestGhost[0] * (newScaredTimes[nearestGhost[1]]) * 5
+                - minFood * 50 - successorGameState.getNumFood() * 500)
     else:
         return (nearestGhost[0] * (newScaredTimes[nearestGhost[1]] ) *5
                 - minFood * 5 - successorGameState.getNumFood() * 500)
+
+    ### better version
+    
+    # tempScore = currentGameState.getScore()
+    # if minFood != 0:
+    #     tempScore +=  1 /(minFood+1)
+    # if newScaredTimes[0] > 5:
+    #     tempScore += 20/(minFood+1)
+    #
+    # return tempScore
+
 
 # Abbreviation
 better = betterEvaluationFunction
